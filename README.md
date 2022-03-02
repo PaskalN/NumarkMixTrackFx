@@ -5,4 +5,4 @@ Mixxx Midi for Numark Mix Track Fx
 ![](resources/controller.jpg)
 
 # Software - Mixxx v.2.*
-![](resources/mixxx.jpg)
+![](resources/mixxx.png)
