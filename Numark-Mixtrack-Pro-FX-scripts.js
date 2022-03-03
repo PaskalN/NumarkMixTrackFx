@@ -1,8 +1,17 @@
 // mixxx --controllerDebug
 
-const Machine = {};
-
-Machine.mode = 1;
+const Machine = {
+    settings: {
+        mode: 1, // 0
+        scratchSensitivity: 750,
+    },
+    virtualControllers: {
+        scratch: {
+            '1': false,
+            '2': false,
+        }
+    }
+};
 
 Machine.utils = {
     getChanelGroup: function(number) {
@@ -115,7 +124,6 @@ Machine.Master.prototype = new components.ComponentContainer();
 
 // Effect
 Machine.Effect = function() {
-
     // https://manual.mixxx.org/2.3/en/chapters/appendix/mixxx_controls.html#control-[EffectRack1_EffectUnitN_EffectM]-meta
     this.meta = new Machine.Knob({
         midi: [0xB9, 0x04], // [midi_status_down, midi_number, midi_status_up, midi_number]
@@ -448,13 +456,13 @@ Machine.Deck = function(deckNumbers) {
 
     // https://manual.mixxx.org/2.3/en/chapters/appendix/mixxx_controls.html#control-[ChannelN]-jog
     this.wheel = function (channel, control, value, status, group) {
-        var forward = value < 64 ? 1 : -1;
+        // var forward = value < 64 ? 1 : -1;
         
-        if (forward < 0) {
-            engine.setValue(group, 'jog',  -1 * (128 - value) * 0.05);
-        } else {
-            engine.setValue(group, 'jog', value * 0.05);
-        }
+        // if (forward < 0) {
+        //     engine.setValue(group, 'jog',  -1 * (128 - value) * 0.05);
+        // } else {
+        //     engine.setValue(group, 'jog', value * 0.05);
+        // }
     }
 
     this.forward = new Machine.Button({
@@ -537,6 +545,85 @@ Machine.Deck = function(deckNumbers) {
         inKey: 'beatjump_1_backward',
         type: components.Button.prototype.types.press,
     });
+
+    this.scratchEnable = new Machine.Button({
+        midi: [0x90 + statusOffset, 0x07],
+        group: group,
+        inKey: 'scratchEnabled',
+        type: components.Button.prototype.types.toggle,
+
+        standBy: function() {
+            this.ledOnOff(false);
+        },
+
+        input: function (channel, control, value, status, group) {
+            var vurtualComponent = channel + 1;
+            // print(Machine.virtualControllers.scratch[vurtualComponent])
+            Machine.virtualControllers.scratch[vurtualComponent] = !Machine.virtualControllers.scratch[vurtualComponent];
+
+            if (Machine.virtualControllers.scratch[vurtualComponent]) {
+                this.ledOnOff(true);
+            } else {
+                this.ledOnOff(false);
+            }
+        }
+    });
+
+    // The button that enables/disables scratching
+    this.wheelTouch = function (channel, control, value, status, group) {
+        var deckNumber = script.deckFromGroup(group);
+        // if ((status & 0xF0) === 0x90) {    // If button down
+        var vurtualComponent = channel + 1;
+        if (Machine.virtualControllers.scratch[vurtualComponent]) {
+
+            if (value === 0x7F) {  // Some wheels send 0x90 on press and release, so you need to check the value
+                var alpha = 1.0/8;
+                var beta = alpha/32;
+
+                engine.scratchEnable(deckNumber, Machine.settings.scratchSensitivity, 33+1/3, alpha, beta);
+            } else {    // If button up
+                engine.scratchDisable(deckNumber);
+            }
+        } else {
+            engine.scratchDisable(deckNumber);
+        }
+    }
+
+    // The wheel that actually controls the scratching
+    this.wheelTurn = function (channel, control, value, status, group) {
+        // --- Choose only one of the following!
+        
+        // A: For a control that centers on 0:
+        var newValue;
+        if (value < 64) {
+            newValue = value;
+        } else {
+            newValue = value - 128;
+        }
+
+        // B: For a control that centers on 0x40 (64):
+        // var newValue = value - 64;
+        
+        // --- End choice
+        
+        // In either case, register the movement
+        var deckNumber = script.deckFromGroup(group);
+        // engine.scratchTick(deckNumber, newValue);
+
+
+
+        if (engine.isScratching(deckNumber)) {
+            engine.scratchTick(deckNumber, newValue); // Scratch!
+        } else {
+            var forward = value < 64 ? 1 : -1;
+        
+            if (forward < 0) {
+                engine.setValue(group, 'jog',  -1 * (128 - value) * 0.05);
+            } else {
+                engine.setValue(group, 'jog', value * 0.05);
+            }
+        }
+    }
 }
 
 Machine.Deck.prototype = new components.ComponentContainer();
@@ -570,7 +657,7 @@ Machine.Mixer = function(deckNumbers, instance) {
         inSetParameter: function (value) {
             engine.setParameter(this.group, this.inKey, -0.2 + 1.4 * value);
 
-            if (Machine.mode === 1) {
+            if (Machine.settings.mode === 1) {
                 engine.setParameter(this.group, 'parameter2', 1 - value);
             }
 
@@ -832,6 +919,12 @@ MixtrackProFX.initConnection = function() {
     // Single Connections
 };
 
+MixtrackProFX.resetScratch = function(deckNumber) {
+    MixtrackProFX.virtualControllers.scratch[deckNumber] = false;
+    MixtrackProFX.Deck[deckNumber].scratchEnable.standBy();
+    engine.scratchDisable(deckNumber);
+}
+
 MixtrackProFX.init = function(id, debug) {
     // [Master]
     // 1. headphonesGain.input
@@ -895,7 +988,13 @@ MixtrackProFX.init = function(id, debug) {
         MixtrackProFX.Master,
         MixtrackProFX.Effect
     ]);
+
     MixtrackProFX.initConnection();
+
+    // Reset Scratches
+    MixtrackProFX.resetScratch(1);
+    MixtrackProFX.resetScratch(2);
+
 }
 
 MixtrackProFX.shutdown = function() {
