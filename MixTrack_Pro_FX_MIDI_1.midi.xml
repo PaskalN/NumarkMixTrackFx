@@ -22,6 +22,90 @@
                     <script-binding/>
                 </options>
             </control>
+
+
+            <control>
+                <group>[Channel1]</group>
+                <key>MixtrackProFX.Deck[1].wheelTurn</key>
+                <status>0xB0</status>
+                <midino>0x06</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>MixtrackProFX.Deck[2].wheelTurn</key>
+                <status>0xB1</status>
+                <midino>0x06</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+
+
+
+            <control>
+                <group>[Channel1]</group>
+                <key>MixtrackProFX.Deck[1].wheelTouch</key>
+                <status>0x90</status>
+                <midino>0x06</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>MixtrackProFX.Deck[2].wheelTouch</key>
+                <status>0x91</status>
+                <midino>0x06</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+
+
+            <control>
+                <group>[Channel1]</group>
+                <key>MixtrackProFX.Deck[1].scratchEnable.input</key>
+                <status>0x90</status>
+                <midino>0x07</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>MixtrackProFX.Deck[2].scratchEnable.input</key>
+                <status>0x91</status>
+                <midino>0x07</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+
+            <!-- <control>
+                <group>[Channel1]</group>
+                <key>MixtrackProFX.Deck[1].scratchEnable.output</key>
+                <status>0x80</status>
+                <midino>0x07</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel2]</group>
+                <key>MixtrackProFX.Deck[2].scratchEnable.output</key>
+                <status>0x81</status>
+                <midino>0x07</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control> -->
+
+
+
+
             <control>
                 <group>[Channel2]</group>
                 <key>MixtrackProFX.Deck[2].cueClear.input</key>
@@ -355,15 +439,7 @@
                     <script-binding/>
                 </options>
             </control>
-            <control>
-                <group>[Channel2]</group>
-                <key>MixtrackProFX.Deck[2].wheel</key>
-                <status>0xB1</status>
-                <midino>0x06</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
+            
             <control>
                 <group>[EqualizerRack1_Channel1_Effect1]</group>
                 <key>MixtrackProFX.Mixer[1].mid.input</key>
@@ -378,15 +454,6 @@
                 <key>MixtrackProFX.Deck[1].backward.output</key>
                 <status>0x84</status>
                 <midino>0x1A</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>MixtrackProFX.Deck[1].wheel</key>
-                <status>0xB0</status>
-                <midino>0x06</midino>
                 <options>
                     <script-binding/>
                 </options>
